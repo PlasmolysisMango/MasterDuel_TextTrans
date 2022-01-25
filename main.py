@@ -174,6 +174,25 @@ def judge_type(img: Image, zoom = tuple) -> int:
         if maxerr > 100:
             return 0
 
+def transcontent(content) -> str:
+    if not content:
+        return None
+    else:
+        string = ""
+        for c in content:
+            if c == '"':
+                string += c
+            elif c == "'":
+                string += "''"
+            elif c == "\\":
+                string += "\\\\"
+            elif c == "—":
+                string += "-"
+            else:
+                string += c
+    return string
+            
+
 def mainloop(type:int):
     hwnd=get_game_window_info()
     status,result=window_shot_image(hwnd)
@@ -199,18 +218,24 @@ def mainloop(type:int):
         return
     eng_sql = sqlite3.connect(cardsdb_eng_dir)
     chn_sql = sqlite3.connect(cardsdb_chn_dir)
-    
-    cursor = eng_sql.execute(f"SELECT id,name from texts WHERE name LIKE '%{card_str}%' LIMIT 1")
-    data=cursor.fetchone()
-    if cursor.arraysize!=1 or not data:
+    trytimes = 0
+    while (trytimes < 3):
+        cursor = eng_sql.execute("SELECT id,name from texts WHERE name LIKE '%{}%' LIMIT 1".format(transcontent(card_str)))
+        data=cursor.fetchone()
+        if not data:
+            card_str = card_str[:-1]
+            trytimes += 1
+            continue
+        else:
+            card_id = data[0]
+            card_name = data[1]
+            break
+    if not data:
         print(f"card {card_str} not found in english database")
         eng_sql.close()
         chn_sql.close()
         return
-    card_id = data[0]
-    card_name = data[1]
-
-    cursor = chn_sql.execute(f"SELECT name,desc from texts WHERE id = '{card_id}' LIMIT 1")
+    cursor = chn_sql.execute("SELECT name,desc from texts WHERE id = ? LIMIT 1", (card_id, ))
     data=cursor.fetchone()
     if cursor.arraysize!=1 or not data:
         print(f"card {card_name} not found in chinese database")
