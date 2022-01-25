@@ -1,0 +1,12 @@
+altgraph==0.17.2
+certifi==2021.10.8
+future==0.18.2
+keyboard==0.13.5
+pefile==2021.9.3
+Pillow==8.4.0
+pyinstaller==4.8
+pyinstaller-hooks-contrib==2021.5
+pytesseract==0.3.8
+pywin32==302
+pywin32-ctypes==0.2.0
+wincertstore==0.2
