@@ -220,13 +220,16 @@ def mainloop(type:int):
     chn_sql = sqlite3.connect(cardsdb_chn_dir)
     trytimes = 0
     while (trytimes < 3):
-        cursor = eng_sql.execute("SELECT id,name from texts WHERE name LIKE '%{}%' LIMIT 1".format(transcontent(card_str)))
+        cursor = eng_sql.execute("SELECT id,name from texts WHERE name = ? LIMIT 1", (card_str, ))
         data=cursor.fetchone()
+        if not data:
+            cursor = eng_sql.execute("SELECT id,name from texts WHERE name LIKE '%{}%' LIMIT 1".format(transcontent(card_str)))
+            data=cursor.fetchone()
         if not data:
             card_str = card_str[:-1]
             trytimes += 1
             continue
-        else:
+        else: 
             card_id = data[0]
             card_name = data[1]
             break
